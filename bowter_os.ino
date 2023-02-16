@@ -1,6 +1,6 @@
 // This example uses an ESP32 Development Board
 // to connect to shiftr.io.
-//
+// bowter
 // You can check on your device after a successful
 // connection here: https://www.shiftr.io/try.
 //
