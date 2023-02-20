@@ -9,13 +9,12 @@
 
 #include <WiFiClientSecure.h>
 #include <MQTT.h>
-
+int relay = 14;
 const char ssid[] = "ulveseth_Guest";
 const char pass[] = "pass";
 
 WiFiClientSecure net;
-MQTTClient client;
-
+MQTTClient client; 
 unsigned long lastMillis = 0;
 
 void connect() {
@@ -43,6 +42,14 @@ void connect() {
 
 void messageReceived(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
+  if(payload == "started") {
+    Serial.println("jag startar båten");
+    digitalWrite(relay, 1);
+  }
+  if(payload == "stopped") {
+    Serial.println("jag stoppar båten");
+    digitalWrite(relay, 0);
+  }
 
   // Note: Do not use the client in the callback to publish, subscribe or
   // unsubscribe as it may cause deadlocks when other things arrive while
@@ -53,20 +60,15 @@ void messageReceived(String &topic, String &payload) {
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid);
-
-  // Note: Local domain names (e.g. "Computer.local" on OSX) are not supported
-  // by Arduino. You need to set the IP address directly.
-  //
-  // MQTT brokers usually use port 8883 for secure connections.
   client.begin("mqtt.ably.io", 8883, net);
   client.onMessage(messageReceived);
-
   connect();
+  pinMode(relay, OUTPUT);
 }
 
 void loop() {
   client.loop();
-  delay(10);  // <- fixes some issues with WiFi stability
+  delay(2000);  // <- fixes some issues with WiFi stability
 
   if (!client.connected()) {
     connect();
@@ -74,8 +76,8 @@ void loop() {
   }
 
   // publish a message roughly every second.
-  if (millis() - lastMillis > 5000) {
-    lastMillis = millis();
+  //if (millis() - lastMillis > 5000) {
+  //  lastMillis = millis();
     //client.publish("1", "100%");
-  }
+  //}
 }
